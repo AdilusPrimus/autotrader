@@ -94,7 +94,7 @@ Successfully installed Jinja2-3.1.2 MarkupSafe-2.1.2 Werkzeug-2.3.4 blinker-1.6.
 
 ### Parametrization
 
-In the [ImportCarRequests.py)](./ImportCarRequests.py) script, you can change the request parameters as suited
+In the [ImportCarRequests.py](./ImportCarRequests.py) script, you can change the request parameters as suited
 
 ```python
 params = dict(
