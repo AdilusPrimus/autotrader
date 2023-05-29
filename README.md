@@ -87,4 +87,4 @@ Successfully installed Jinja2-3.1.2 MarkupSafe-2.1.2 Werkzeug-2.3.4 blinker-1.6.
 
 ## References
 
-https://developers.autotrader.co.uk/api#introduction
+* [Autotrader.com APIs Specification for developers](https://developers.autotrader.co.uk/api#introduction)
