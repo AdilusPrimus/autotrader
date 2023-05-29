@@ -1,0 +1,16 @@
+{
+    "recommendations": [
+        "zainchen.json",
+        "amazonwebservices.aws-toolkit-vscode",
+        "aaron-bond.better-comments",
+        "danielsanmedium.dscodegpt",
+        "redhat.fabric8-analytics",
+        "ms-vscode-remote.remote-containers",
+        "ms-azuretools.vscode-docker",
+        "github.vscode-github-actions",
+        "github.codespaces",
+        "github.remotehub",
+        "github.vscode-pull-request-github",
+        "visualstudioexptteam.vscodeintellicode"
+    ]
+}
