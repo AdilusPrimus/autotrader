@@ -2,6 +2,8 @@
 
 Explore the API based integration points for autotrader.com by leveraging Python Programming Language.
 
+> No account is required for interacting with autotrader.com's APIs Operations that were explored in this project
+
 # Workspace Configuration
 
 ## Pre-Requisites
@@ -24,7 +26,7 @@ python3 -m venv .venv
 ### Upgrading pip
 
 ```python
-python3.10 -m pip install --upgrade pip
+python3 -m pip install --upgrade pip
 
 Requirement already satisfied: pip in /opt/homebrew/lib/python3.10/site-packages (23.0.1)
 Collecting pip
@@ -38,6 +40,8 @@ Successfully installed pip-23.1.2
 ```
 
 ### Installing the Request Py Library
+
+> We need all the libraries required for REST API Calls as well as a MVC Web Framework.
 
 ```python
 pip install requests
@@ -84,6 +88,42 @@ Collecting MarkupSafe>=2.0 (from Jinja2>=3.1.2->flask)
 Downloading MarkupSafe-2.1.2-cp310-cp310-macosx_10_9_universal2.whl (17 kB)
 Installing collected packages: MarkupSafe, itsdangerous, click, blinker, Werkzeug, Jinja2, flask
 Successfully installed Jinja2-3.1.2 MarkupSafe-2.1.2 Werkzeug-2.3.4 blinker-1.6.2 click-8.1.3 flask-2.3.2 itsdangerous-2.1.2
+```
+
+## Let's get started with the application
+
+### Parametrization
+
+In the [ImportCarRequests.py)](./ImportCarRequests.py) script, you can change the request parameters as suited
+
+```python
+params = dict(
+    zip=90210,
+    makeCodeList='ROV',
+    modelCodeList='DEFEND',
+    marketExtension='true',
+    maxMileage=150000,
+    startYear=1980,
+    endYear=2013,
+    searchRadius=500,
+    maxPrice=100000,
+    sortBy='mileageASC',
+    numRecords=100,
+    firstRecord=0,
+    style='Truck'
+)
+```
+### Script Execution
+
+```python
+
+python3 ./ImportCarRequests.py 
+
+684092397       ---     27958 mi        42500$  2024-05-27      42500$  SALDH1285PA537706
+684092411       ---     36000 mi        22000$  2024-05-27      22000$  SALDV324XVA934925
+663965783       ---     59349 mi        94999$  2023-11-13      94999$  SALDV3243VA130787
+672325558       ---     71772 mi        69880$  2024-02-08      69880$  SALLDVAF7TA970849
+684092332       ---     86991 mi        35000$  2024-05-27      35000$  SALDV3247VA264587
 ```
 
 ## References
