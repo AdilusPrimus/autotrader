@@ -16,8 +16,9 @@ Explore the API based integration points for autotrader.com by leveraging Python
 From the workspace's root folder, please type the following commands:
 
 ```python
-python3 -m venv .
-source env/bin/activate
+python3 -m venv .venv
+. ./.venv/bin/activate
+
 ```
 
 ### Upgrading pip
@@ -88,3 +89,4 @@ Successfully installed Jinja2-3.1.2 MarkupSafe-2.1.2 Werkzeug-2.3.4 blinker-1.6.
 ## References
 
 * [Autotrader.com APIs Specification for developers](https://developers.autotrader.co.uk/api#introduction)
+* [Using Python in VSCode](https://code.visualstudio.com/docs/python/environments)
