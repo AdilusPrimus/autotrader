@@ -10,13 +10,13 @@ params = dict(
     makeCodeList='ROV',
     modelCodeList='DEFEND',
     marketExtension='true',
-    maxMileage=150000,
-    startYear=1980,
-    endYear=2013,
-    searchRadius=500,
-    maxPrice=100000,
+    maxMileage=500000,
+    startYear=1953,
+    endYear=2016,
+    searchRadius=10000,
+    maxPrice=500000,
     sortBy='mileageASC',
-    numRecords=100,
+    numRecords=1000,
     firstRecord=0,
     style='Truck'
 )
@@ -35,11 +35,16 @@ data = resp.json()
 
 hasnav = "false"
 
+counter=0
+
 if 'listings' not in data:
     print('NO MATCH FOUND', end='\n\r')
 else:
     for listing in data['listings']:
 
+        counter=counter+1
+        print(str(counter), end='\t')
+              
         print(str(listing['id']).expandtabs(16), end='\t')
 
         if ('features' in listing):
@@ -53,8 +58,15 @@ else:
         else:
             print('---', end='\t')
 
+        print(listing['year'], end='\t')
+        
         if('mileage' in listing['specifications']):
-            print(listing['specifications']['mileage']['value'].replace(',', ''), end=' ')
+
+            if(listing['specifications']['mileage']['value'] < "300000"):
+                print(listing['specifications']['mileage']['value'].replace(',', ''), end=' ')
+            else:
+                print('----------$', end='\t')
+                
             if(listing['specifications']['mileage']['label'] != 'miles'):
                 print("km".expandtabs(2), end='\t')
             else:
