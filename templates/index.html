@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoTrader Search</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: sans-serif; max-width: 1300px; margin: 2rem auto; padding: 0 1rem; color: #222; }
+    h1 { margin-bottom: 1.25rem; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.75rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.25rem; }
+    label { font-size: 0.8rem; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: .03em; }
+    input, select { padding: 0.4rem 0.5rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem; }
+    input:focus, select:focus { outline: 2px solid #0066cc; border-color: transparent; }
+    .actions { margin-top: 1rem; }
+    button { padding: 0.55rem 1.75rem; background: #0066cc; color: #fff; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer; }
+    button:hover { background: #0052a3; }
+    .error { color: #c00; margin: 1rem 0; padding: 0.6rem 1rem; background: #fff0f0; border-left: 4px solid #c00; border-radius: 2px; }
+    .summary { margin: 1.5rem 0 0.6rem; color: #555; font-size: 0.95rem; }
+    .no-results { color: #888; margin: 1.5rem 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    th { background: #f4f4f4; text-align: left; padding: 0.5rem 0.6rem; border-bottom: 2px solid #ddd; white-space: nowrap; }
+    td { padding: 0.4rem 0.6rem; border-bottom: 1px solid #eee; vertical-align: middle; }
+    tr:hover td { background: #f9f9f9; }
+    .nav-yes { color: #197a19; font-weight: 700; }
+    .nav-no { color: #aaa; }
+    .price { font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+  <h1>AutoTrader Search</h1>
+
+  <form method="POST">
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="zip">ZIP Code</label>
+        <input type="text" id="zip" name="zip" value="{{ form.zip }}" required>
+      </div>
+      <div class="form-group">
+        <label for="makeCodeList">Make Code</label>
+        <input type="text" id="makeCodeList" name="makeCodeList" value="{{ form.makeCodeList }}" placeholder="e.g. ROV, BMW">
+      </div>
+      <div class="form-group">
+        <label for="modelCodeList">Model Code</label>
+        <input type="text" id="modelCodeList" name="modelCodeList" value="{{ form.modelCodeList }}" placeholder="e.g. DEFEND">
+      </div>
+      <div class="form-group">
+        <label for="startYear">Start Year</label>
+        <input type="number" id="startYear" name="startYear" value="{{ form.startYear }}" min="1900" max="2100">
+      </div>
+      <div class="form-group">
+        <label for="endYear">End Year</label>
+        <input type="number" id="endYear" name="endYear" value="{{ form.endYear }}" min="1900" max="2100">
+      </div>
+      <div class="form-group">
+        <label for="maxMileage">Max Mileage</label>
+        <input type="number" id="maxMileage" name="maxMileage" value="{{ form.maxMileage }}" min="0">
+      </div>
+      <div class="form-group">
+        <label for="maxPrice">Max Price ($)</label>
+        <input type="number" id="maxPrice" name="maxPrice" value="{{ form.maxPrice }}" min="0">
+      </div>
+      <div class="form-group">
+        <label for="searchRadius">Radius (mi)</label>
+        <input type="number" id="searchRadius" name="searchRadius" value="{{ form.searchRadius }}" min="0">
+      </div>
+      <div class="form-group">
+        <label for="style">Style</label>
+        <input type="text" id="style" name="style" value="{{ form.style }}" placeholder="e.g. Truck, SUV">
+      </div>
+      <div class="form-group">
+        <label for="sortBy">Sort By</label>
+        <select id="sortBy" name="sortBy">
+          {% set s = form.sortBy %}
+          <option value="mileageASC"  {% if s == 'mileageASC'  %}selected{% endif %}>Mileage ↑</option>
+          <option value="mileageDESC" {% if s == 'mileageDESC' %}selected{% endif %}>Mileage ↓</option>
+          <option value="priceASC"    {% if s == 'priceASC'    %}selected{% endif %}>Price ↑</option>
+          <option value="priceDESC"   {% if s == 'priceDESC'   %}selected{% endif %}>Price ↓</option>
+          <option value="yearASC"     {% if s == 'yearASC'     %}selected{% endif %}>Year ↑</option>
+          <option value="yearDESC"    {% if s == 'yearDESC'    %}selected{% endif %}>Year ↓</option>
+          <option value="relevance"   {% if s == 'relevance'   %}selected{% endif %}>Relevance</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="numRecords">Max Results</label>
+        <input type="number" id="numRecords" name="numRecords" value="{{ form.numRecords }}" min="1" max="1000">
+      </div>
+    </div>
+    <div class="actions">
+      <button type="submit">Search</button>
+    </div>
+  </form>
+
+  {% if error %}
+    <p class="error">Error: {{ error }}</p>
+  {% endif %}
+
+  {% if listings is not none %}
+    {% if listings %}
+      <p class="summary">{{ listings|length }} listing(s) found</p>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>ID</th>
+            <th>Year</th>
+            <th>Make / Model</th>
+            <th>Nav</th>
+            <th>Mileage</th>
+            <th>Incentive</th>
+            <th>Sale Price</th>
+            <th>Valid Until</th>
+            <th>VIN</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for l in listings %}
+          <tr>
+            <td>{{ l.num }}</td>
+            <td>{{ l.id }}</td>
+            <td>{{ l.year }}</td>
+            <td>{{ l.make }} {{ l.model }}</td>
+            <td>{% if l.nav %}<span class="nav-yes">NAV</span>{% else %}<span class="nav-no">—</span>{% endif %}</td>
+            <td>{{ l.mileage or '—' }}</td>
+            <td class="price">{% if l.incentive is not none %}${{ '{:,}'.format(l.incentive) }}{% else %}—{% endif %}</td>
+            <td class="price">{% if l.sale_price is not none %}${{ '{:,}'.format(l.sale_price) }}{% else %}—{% endif %}</td>
+            <td>{{ l.price_valid_until or '—' }}</td>
+            <td>{{ l.vin or '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="no-results">No listings found for your search criteria.</p>
+    {% endif %}
+  {% endif %}
+</body>
+</html>
