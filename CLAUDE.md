@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Python script that queries the autotrader.com search REST API (`https://www.autotrader.com/rest/searchresults/base`) without requiring an account and prints matching car listings to stdout.
+This is a Python project that queries the autotrader.com search REST API (`https://www.autotrader.com/rest/searchresults/base`) without requiring an account. It has two interfaces: a CLI script and a Flask web UI.
 
 ## Setup
 
@@ -15,33 +15,41 @@ pip install --upgrade pip
 pip install requests flask
 ```
 
-## Running the Script
+## Running
 
+**CLI:**
 ```bash
 python3 ./ImportCarRequests.py
+# Override any default parameter:
+python3 ./ImportCarRequests.py --zip 90210 --make ROV --model DEFEND --start-year 1980 --end-year 2013 --max-price 100000 --radius 500 --sort priceASC
 ```
 
-No arguments — all search parameters are hardcoded in the `params` dict near the top of `ImportCarRequests.py`. Edit that dict to change the search (zip, make/model codes, year range, price, mileage, radius, etc.).
+**Flask web UI:**
+```bash
+flask --app app.py run --debug
+# then open http://127.0.0.1:5000
+```
 
 ## Architecture
 
-The entire project is a single script (`ImportCarRequests.py`). It:
+`ImportCarRequests.py` is the core module. It exposes two things used by both the CLI and the web app:
 
-1. Builds a query using the `params` dict and sends a GET request with a browser-spoofing `User-Agent` header (required — autotrader.com blocks non-browser agents).
-2. Parses the JSON response and iterates `data['listings']`.
-3. For each listing prints: counter, listing ID, nav feature presence (`NAV`/`---`), year, mileage, incentive price, `priceValidUntil` date, sale price, and VIN.
+- `DEFAULT_PARAMS` — dict of all search parameters with default values
+- `fetch_listings(params)` — makes the GET request and returns `data['listings']` (empty list on no match)
 
-`ResponseTemplate.json` is a reference sample of a single listing object from the API — useful for understanding all available fields without making a live request. Key fields used by the script:
+The script requires a browser-spoofing `User-Agent` header — autotrader.com blocks requests without one.
 
-- `listing['id']`, `listing['year']`, `listing['vin']`
-- `listing['features']` — list of feature strings; nav detection does a case-insensitive `'nav' in feature`
-- `listing['specifications']['mileage']['value']` and `['label']`
+`app.py` imports `fetch_listings` and `DEFAULT_PARAMS` from `ImportCarRequests`, processes each raw listing into a flat display dict via `_process_listing()`, and passes it to `templates/index.html`.
+
+`ResponseTemplate.json` is a reference sample of a single listing object from the API — useful for understanding available fields without making a live request. Key fields:
+
+- `listing['id']`, `listing['year']`, `listing['vin']`, `listing['make']`, `listing['model']`
+- `listing['features']` — list of feature strings; nav detection checks `'nav' in feature.lower()`
+- `listing['specifications']['mileage']['value']` (comma-formatted string) and `['label']`
 - `listing['pricingDetail']['incentive']` and `['salePrice']`
 - `listing['priceValidUntil']`
 
 ## Known Issues / TODOs
 
-- Search parameters are hardcoded; the TODO comment in the script calls for externalizing them (e.g., CLI args or a config file).
-- Mileage threshold comparison (`listing['specifications']['mileage']['value'] < "300000"`) is a **string comparison**, not numeric — will produce incorrect results for values whose string sort order differs from numeric order.
-- The `hasnav` flag is never reset between listings, so once a listing has nav, all subsequent listings will also show `NAV`.
-- The `.vscode/launch.json` includes a Flask configuration (`FLASK_APP=app.py`) indicating a planned web front-end that does not yet exist.
+- The Flask web UI does not paginate results; large `numRecords` values return everything at once.
+- Make/model codes (`makeCodeList`, `modelCodeList`) are autotrader-internal identifiers (e.g. `ROV` for Land Rover, `DEFEND` for Defender) — there is no lookup helper yet.
